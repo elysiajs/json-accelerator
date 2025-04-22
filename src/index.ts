@@ -2,8 +2,8 @@ import type { TAnySchema, TRecord } from '@sinclair/typebox'
 
 const Kind = Symbol.for('TypeBox.Kind')
 const OptionalKind = Symbol.for('TypeBox.Optional')
-
-const isSpecialProperty = (name: string) => /(\ |-|\t|\n)/.test(name)
+const SPECIAL_PROP_REGEXP = /(\ |-|\t|\n)/
+const isSpecialProperty = (name: string) => SPECIAL_PROP_REGEXP.test(name)
 
 const joinProperty = (v1: string, v2: string | number) => {
 	if (typeof v2 === 'number') return `${v1}[${v2}]`
