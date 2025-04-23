@@ -28,7 +28,7 @@ export const benchmark = <T extends TAnySchema>(
 	compact(() => {
 		barplot(() => {
 			summary(() => {
-				bench('JSON Stingify', () => {
+				bench('JSON Stringify', () => {
 					return JSON.stringify(value)
 				})
 
