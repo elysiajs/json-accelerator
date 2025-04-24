@@ -19,14 +19,14 @@
 		}
 	},
 	"devDependencies": {
-		"@types/bun": "1.2.2",
-		"elysia": "^1.2.11",
+		"@types/bun": "1.2.10",
+		"elysia": "^1.2.25",
 		"eslint": "9.6.0",
 		"fast-json-stringify": "^6.0.1",
-		"mitata": "^1.0.33",
-		"tsup": "^8.1.0",
+		"mitata": "^1.0.34",
+		"tsup": "^8.4.0",
 		"tsx": "^4.19.2",
-		"typescript": "^5.5.3"
+		"typescript": "^5.8.2"
 	},
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/index.mjs",

@@ -28,16 +28,16 @@ export const benchmark = <T extends TAnySchema>(
 	compact(() => {
 		barplot(() => {
 			summary(() => {
-				bench('JSON Stringify', () => {
-					return JSON.stringify(value)
+				bench('JSON Accelerator', () => {
+					return encode(value)
 				})
 
-				bench('Fast Json Stringify', () => {
+				bench('Fast JSON Stringify', () => {
 					return fastJsonStringify(value)
 				})
 
-				bench('JSON Accelerator', () => {
-					return encode(value)
+				bench('JSON Stringify', () => {
+					return JSON.stringify(value)
 				})
 
 				// const validator = TypeCompiler.Compile(model)
