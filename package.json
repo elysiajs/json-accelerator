@@ -21,7 +21,7 @@
 	"devDependencies": {
 		"@types/bun": "1.2.10",
 		"elysia": "^1.2.25",
-		"eslint": "9.6.0",
+		"eslint": "9.25.1",
 		"fast-json-stringify": "^6.0.1",
 		"mitata": "^1.0.34",
 		"tsup": "^8.4.0",
