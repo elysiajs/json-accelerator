@@ -187,10 +187,9 @@ const joinStringArray = (p: string) =>
 	`"$\{` +
 	`((p)=>{` +
 	`if(p.length===1)return p\n` +
-	`let ars=''\n` +
-	`for(let i=0;i<p.length;i++){` +
-	`if(i===0)ars+=p[i]\n` +
-	`else ars+=\`","\${p[i]}\`` +
+	`let ars=p[0]\n` +
+	`for(let i=1;i<p.length;i++){` +
+	`ars=\`\${ars}","\${p[i]}\`` +
 	`}` +
 	`return ars` +
 	`})(${p})` +
@@ -439,10 +438,10 @@ const accelerate = (
 				`let ar${i}v='[';` +
 				`for(let i=0;i<ar${i}s.length;i++){` +
 				`const ar${i}p=ar${i}s[i];` +
-				`if(i!==0){ar${i}v+=','}` +
-				`ar${i}v+=\`${accelerate(schema.items, `ar${i}p`, instruction)}\`` +
+				`if(i!==0){ar${i}v=\`\${ar${i}v},\`}` +
+				`ar${i}v=\`\${ar${i}v}${accelerate(schema.items, `ar${i}p`, instruction)}\`` +
 				`}` +
-				`return ar${i}v+']'`
+				`return \`\${ar${i}v}]\``
 
 			if (!isRoot) v += `})(${property})}`
 

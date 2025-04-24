@@ -1,3 +1,7 @@
+# 0.1.7
+Improvement:
+- improve array operation
+
 # 0.1.6 - 24 Apr 2025
 Improvement:
 - reduce instruction for string placement
