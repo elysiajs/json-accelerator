@@ -1,4 +1,4 @@
-import { bench, run, barplot, summary, compact } from 'mitata'
+import { bench, run, barplot, summary, compact, do_not_optimize } from 'mitata'
 
 import { createAccelerator } from '../src'
 import { TypeCompiler } from '@sinclair/typebox/compiler'
@@ -29,23 +29,34 @@ export const benchmark = <T extends TAnySchema>(
 		barplot(() => {
 			summary(() => {
 				bench('JSON Stingify', () => {
-					return JSON.stringify(value)
+                    do_not_optimize( () => {
+					    const result = JSON.stringify(value)
+					    return result
+                    })
 				})
 
 				bench('Fast Json Stringify', () => {
-					return fastJsonStringify(value)
+				    do_not_optimize( () => {	
+                        const result = fastJsonStringify(value)
+                        return result
+                    })
 				})
 
 				bench('JSON Accelerator', () => {
-					return encode(value)
+					do_not_optimize( () => {
+                        const result = encode(value)
+					    return result
+                    })
 				})
 
 				const validator = TypeCompiler.Compile(model)
 
 				bench('JSON Accelerator w/ validation', () => {
-					validator.Check(value)
-
-					return encode(value)
+				    do_not_optimize( () => {	
+                        validator.Check(value)
+                        const result = encode(value)
+                        return result
+                    })
 				})
 			})
 		})
