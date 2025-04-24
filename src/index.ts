@@ -528,7 +528,7 @@ export const createAccelerator = <T extends TAnySchema>(
 		definitions
 	})
 
-	console.log(f)
+	// console.log(f)
 
 	return Function('v', f) as any
 }
