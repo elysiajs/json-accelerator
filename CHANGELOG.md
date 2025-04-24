@@ -1,3 +1,8 @@
+# 0.1.6 - 24 Apr 2025
+Improvement:
+- reduce instruction for string placement
+- inline regex test to each string
+
 # 0.1.5 - 22 Apr 2025
 Improvement:
 - add `schema.trusted` for string

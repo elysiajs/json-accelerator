@@ -156,7 +156,6 @@ const isDateType = (schema: TAnySchema): boolean => {
 interface Instruction {
 	array: number
 	optional: number
-	hasString: boolean
 	properties: string[]
 	/**
 	 * If unsafe character is found, how should the encoder handle it?
@@ -173,12 +172,15 @@ interface Instruction {
 	definitions: Record<string, TAnySchema>
 }
 
+// equivalent to /["\n\r\t\b\f\v]/
+const findEscapeSequence = /["\b\t\n\v\f\r\/]/
+
 const SANITIZE = {
 	auto: (property: string) =>
-		`re.test(${property})?JSON.stringify(${property}):\`"$\{${property}}"\``,
+		`${findEscapeSequence}.test(${property})?JSON.stringify(${property}).slice(1,-1):${property}`,
 	manual: (property: string) => `${property}`,
 	throw: (property: string) =>
-		`re.test(${property})?(()=>{throw new Error("Property '${property}' contains invalid characters")})():${property}`
+		`${findEscapeSequence}.test(${property})?(()=>{throw new Error("Property '${property}' contains invalid characters")})():${property}`
 } satisfies Record<Instruction['sanitize'], (v: string) => string>
 
 const joinStringArray = (p: string) =>
@@ -260,8 +262,6 @@ const accelerate = (
 
 	switch (schema.type) {
 		case 'string':
-			if (!schema.const && !schema.trusted) instruction.hasString = true
-
 			// string operation would be repeated multiple time
 			// it's fine to optimize it to the most optimized way
 			if (
@@ -280,13 +280,13 @@ const accelerate = (
 						sanitize = (v: string) =>
 							`\`"$\{${SANITIZE['manual'](v)}}"\``
 
-					v = `\${${nullableCondition}?${schema.const !== undefined ? `'${JSON.stringify(schema.const)}'` : schema.default !== undefined ? `'${JSON.stringify(schema.default)}'` : `'null'`}:${sanitize(property)}}`
+					v = `\${${nullableCondition}?${schema.const !== undefined ? `'${JSON.stringify(schema.const)}'` : schema.default !== undefined ? `'${JSON.stringify(schema.default)}'` : `'null'`}:\`"\${${sanitize(property)}}"\`}`
 				} else {
 					if (schema.const !== undefined)
 						v = JSON.stringify(schema.const)
 					else if (schema.trusted)
 						v = `"\${${SANITIZE['manual'](property)}}"`
-					else v = `\${${sanitize(property)}}`
+					else v = `"\${${sanitize(property)}}"`
 				}
 			} else {
 				// In this case quote is handle outside to improve performance
@@ -356,7 +356,8 @@ const accelerate = (
 				const name = joinProperty(property, key)
 				const hasShortName =
 					schema.properties[key].type === 'object' &&
-					!name.startsWith('ar')
+					!name.startsWith('ar') &&
+					Object.keys(schema.properties).length > 5
 
 				const i = instruction.properties.length
 				if (hasShortName) instruction.properties.push(name)
@@ -487,9 +488,6 @@ const accelerate = (
 
 	let setup = ''
 
-	if (instruction.hasString)
-		setup += `const re=/[\\b\\f\\n\\r\\t\\\\\\\\/"]/\n`
-
 	if (instruction.optional) {
 		setup += 'let '
 
@@ -528,7 +526,6 @@ export const createAccelerator = <T extends TAnySchema>(
 		array: 0,
 		optional: 0,
 		properties: [],
-		hasString: false,
 		sanitize,
 		definitions
 	})

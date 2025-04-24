@@ -14,7 +14,7 @@
         "typescript": "^5.5.3",
       },
       "peerDependencies": {
-        "@sinclair/typebox": "^0.34.31",
+        "@sinclair/typebox": ">= 0.34.0",
       },
       "optionalPeers": [
         "@sinclair/typebox",

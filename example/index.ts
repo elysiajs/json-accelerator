@@ -2,15 +2,17 @@ import { t } from 'elysia'
 import { createAccelerator } from '../src/index'
 
 const shape = t.Object({
-	message: t.String({
-		trusted: true
+	name: t.String({
+		// trusted: true
 	})
 })
 
+const string = `hi awd`
+
 const value = {
-	message: 'a'
+	name: string
 } satisfies typeof shape.static
 
 const mirror = createAccelerator(shape)
 
-console.log(mirror(value))
+console.log(JSON.parse(mirror(value)))
