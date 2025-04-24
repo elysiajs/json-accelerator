@@ -13,7 +13,7 @@ runtime: node 22.6.0 (arm64-darwin)
 
 summary
   JSON Accelerator
-   2.12x faster than JSON Stingify
+   2.12x faster than JSON Stringify
    2.66x faster than Fast Json Stringify
 ```
 
