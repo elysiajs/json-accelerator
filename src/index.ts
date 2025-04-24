@@ -355,8 +355,7 @@ const accelerate = (
 				const name = joinProperty(property, key)
 				const hasShortName =
 					schema.properties[key].type === 'object' &&
-					!name.startsWith('ar') &&
-					Object.keys(schema.properties).length > 5
+					!name.startsWith('ar')
 
 				const i = instruction.properties.length
 				if (hasShortName) instruction.properties.push(name)
@@ -528,6 +527,8 @@ export const createAccelerator = <T extends TAnySchema>(
 		sanitize,
 		definitions
 	})
+
+	console.log(f)
 
 	return Function('v', f) as any
 }
