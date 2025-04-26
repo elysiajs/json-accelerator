@@ -178,10 +178,10 @@ const findEscapeSequence = /["\b\t\n\v\f\r\/]/
 const SANITIZE = {
 	auto: (property: string) =>
 		`${findEscapeSequence}.test(${property})?JSON.stringify(${property}).slice(1,-1):${property}`,
-	manual: (property: string) => `${property}`,
+	manual: (property: string) => property, // Remove unnecessary template literal
 	throw: (property: string) =>
 		`${findEscapeSequence}.test(${property})?(()=>{throw new Error("Property '${property}' contains invalid characters")})():${property}`
-} satisfies Record<Instruction['sanitize'], (v: string) => string>
+  } satisfies Record<Instruction['sanitize'], (v: string) => string>
 
 const joinStringArray = (p: string) =>
 	`"$\{` +
