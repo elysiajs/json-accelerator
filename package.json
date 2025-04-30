@@ -19,7 +19,7 @@
 		}
 	},
 	"devDependencies": {
-		"@types/bun": "1.2.10",
+		"@types/bun": "1.2.11",
 		"elysia": "^1.2.25",
 		"eslint": "9.6.0",
 		"fast-json-stringify": "^6.0.1",
