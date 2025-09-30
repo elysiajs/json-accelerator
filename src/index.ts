@@ -172,7 +172,6 @@ interface Instruction {
 	definitions: Record<string, TAnySchema>
 }
 
-// equivalent to /["\n\r\t\b\f\v]/
 const findEscapeSequence = /["\b\t\n\v\f\r\/]/
 
 const SANITIZE = {
