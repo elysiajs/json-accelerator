@@ -3,8 +3,7 @@ import type { TSchema, Static } from 'typebox'
 type TAnySchema = TSchema & Record<string, any>
 
 const kindOf = (schema: any) => schema['~kind']
-const isOptionalSchema = (schema: any) =>
-	schema['~optional'] === true
+const isOptionalSchema = (schema: any) => schema['~optional'] === true
 
 const isIdentifier = /^[A-Za-z_$][A-Za-z0-9_$]*$/
 
@@ -16,10 +15,9 @@ const metadataCache = new WeakMap<
 >()
 
 export const access = (base: string, key: string) =>
-	isIdentifier.test(key) ? `${base}.${key}` : `${base}[${JSON.stringify(key)}]`
-
-// JSON key literal in the output — always quoted
-const encodeProperty = (v: string) => JSON.stringify(v)
+	isIdentifier.test(key)
+		? `${base}.${key}`
+		: `${base}[${JSON.stringify(key)}]`
 
 function isInteger(schema: TAnySchema) {
 	if (isIntegerCache.has(schema)) return isIntegerCache.get(schema)!
@@ -364,7 +362,7 @@ function accelerate(
 				const i = instruction.properties.length
 				if (hasShortName) instruction.properties.push(name)
 
-				const k = encodeProperty(key)
+				const k = JSON.stringify(key)
 				const p = accelerate(
 					schema.properties[key],
 					hasShortName ? `s${i}` : name,
