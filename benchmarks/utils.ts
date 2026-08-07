@@ -1,7 +1,7 @@
 import { bench, run, barplot, summary, compact } from 'mitata'
 
-import { createAccelerator } from '../src'
-import { createByteEncoder } from '../src/bytes'
+import { createAccelerator } from '../src/text'
+import { createByteEncoder } from '../src'
 import fastJson from 'fast-json-stringify'
 
 import type { TSchema, Static } from 'typebox'
@@ -31,9 +31,6 @@ export const benchmark = <T extends TSchema>(
 		throw new Error('Invalid bytes result')
 	}
 
-	// Every bench encodes to UTF-8 bytes: a Response has to flatten the string
-	// and encode it anyway, so measuring string creation alone hides the rope
-	// flattening cost of template-literal output.
 	const enc = new TextEncoder()
 
 	compact(() => {
@@ -48,6 +45,34 @@ export const benchmark = <T extends TSchema>(
 				)
 
 				bench('JSON Stringify', () => enc.encode(JSON.stringify(value)))
+
+				// bench('JSON Accelerator', () => new Response(value, {
+				// 	headers: {
+				// 		'content-type': 'application/json'
+				// 	}
+				// }))
+
+				// bench('JSON Accelerator (bytes)', () => new Response(value, {
+				// 	headers: {
+				// 		'content-type': 'application/json'
+				// 	}
+				// }))
+
+				// bench('Fast JSON Stringify', () =>
+				// 	new Response(fastJsonStringify(value), {
+				// 		headers: {
+				// 			'content-type': 'application/json'
+				// 		}
+				// 	})
+				// )
+
+				// bench('JSON Stringify', () => new Response(JSON.stringify(value), {
+				// 	headers: {
+				// 		'content-type': 'application/json'
+				// 	}
+				// }))
+
+				// bench('Response.json', () => Response.json(value))
 			})
 		})
 	})

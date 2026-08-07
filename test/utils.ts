@@ -1,5 +1,5 @@
 import { Type as t, type TSchema } from 'typebox'
-import { createAccelerator } from '../src'
+import { createAccelerator } from '../src/text/text'
 
 import { expect } from 'bun:test'
 

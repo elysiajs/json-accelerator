@@ -1,5 +1,5 @@
 import { Type as t } from 'typebox'
-import { createAccelerator } from '../src/index'
+import { createByteEncoder } from '../src'
 
 const shape = t.Array(
 	t.Object({
@@ -9,17 +9,18 @@ const shape = t.Array(
 
 const value = [
 	{
-		name: 'a'
+		name: 'a',
+		b: 'aawd'
 	},
 	{
 		name: 'b'
 	}
 ]
 
-const mirror = createAccelerator(shape, {
+const mirror = createByteEncoder(shape, {
 	// worker: true
 })
 
-console.log(mirror.toString())
+// console.log(mirror.toString())
 
-console.log(await mirror(value))
+console.log(mirror(value).toString())

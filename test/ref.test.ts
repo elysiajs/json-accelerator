@@ -3,7 +3,7 @@ import { isEqual } from './utils'
 
 import { Type as t } from 'typebox'
 
-import { createAccelerator } from '../src'
+import { createAccelerator } from '../src/text/text'
 
 describe('Ref', () => {
 	it('handle module', () => {

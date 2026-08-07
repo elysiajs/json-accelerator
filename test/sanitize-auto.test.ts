@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { isEqual } from './utils'
 
 import { Type as t } from 'typebox'
-import { createAccelerator } from '../src'
+import { createAccelerator } from '../src/text/text'
 
 describe('sanitize auto', () => {
 	it('sanitize invalid value', () => {

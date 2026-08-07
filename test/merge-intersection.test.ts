@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 
 import { Type as t } from '@sinclair/typebox'
 
-import { mergeObjectIntersection } from '../src'
+import { mergeObjectIntersection } from '../src/text/text'
 
 describe('Merge Object Intersection', () => {
 	it('work', () => {

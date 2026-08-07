@@ -1,5 +1,5 @@
 import { Type as t } from 'typebox'
-import { createAccelerator } from '../src/index'
+import { createAccelerator } from '../src/text'
 
 const shape = t.Object({
 	id: t.Number(),

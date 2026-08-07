@@ -38,6 +38,11 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs",
 			"require": "./dist/index.js"
+		},
+		"./text": {
+			"types": "./dist/text.d.ts",
+			"import": "./dist/text.mjs",
+			"require": "./dist/text.js"
 		}
 	},
 	"keywords": [
