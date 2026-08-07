@@ -1,7 +1,10 @@
-import { type TAnySchema } from '@sinclair/typebox'
+import { Type as t, type TSchema } from 'typebox'
 import { createAccelerator } from '../src'
 
 import { expect } from 'bun:test'
 
-export const isEqual = (shape: TAnySchema, value: unknown, expected = value) =>
-	expect(JSON.parse(createAccelerator(shape)(value))).toEqual(expected)
+export const isEqual = (shape: TSchema, value: unknown, expected = value) =>
+	expect(JSON.parse(createAccelerator(shape)(value as any))).toEqual(expected)
+
+export const Nullable = <T extends TSchema>(schema: T) =>
+	t.Union([schema, t.Null()])

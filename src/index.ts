@@ -1,23 +1,34 @@
-import type { TAnySchema, TRecord } from '@sinclair/typebox'
+import type { TSchema, Static } from 'typebox'
 
-const Kind = Symbol.for('TypeBox.Kind')
-const OptionalKind = Symbol.for('TypeBox.Optional')
+type TAnySchema = TSchema & Record<string, any>
 
-const isSpecialProperty = (name: string) => /(\ |-|\t|\n)/.test(name)
+const kindOf = (schema: any) => schema['~kind']
+const isOptionalSchema = (schema: any) =>
+	schema['~optional'] === true
 
-const joinProperty = (v1: string, v2: string | number) => {
-	if (typeof v2 === 'number') return `${v1}[${v2}]`
+const isIdentifier = /^[A-Za-z_$][A-Za-z0-9_$]*$/
 
-	if (isSpecialProperty(v2)) return `${v1}["${v2}"]`
+// Memoization caches
+const isIntegerCache = new WeakMap<TAnySchema, boolean>()
+const metadataCache = new WeakMap<
+	TAnySchema,
+	{ schema: TAnySchema; isNullable: boolean; isUndefinable: boolean }
+>()
 
-	return `${v1}.${v2}`
-}
+export const access = (base: string, key: string) =>
+	isIdentifier.test(key) ? `${base}.${key}` : `${base}[${JSON.stringify(key)}]`
 
-const encodeProperty = (v: string) => `"${v}"`
+// JSON key literal in the output — always quoted
+const encodeProperty = (v: string) => JSON.stringify(v)
 
-const isInteger = (schema: TAnySchema) => {
-	if (!schema.anyOf || (Kind in schema && schema[Kind] !== 'Union'))
+function isInteger(schema: TAnySchema) {
+	if (isIntegerCache.has(schema)) return isIntegerCache.get(schema)!
+
+	const kind = kindOf(schema)
+	if (!schema.anyOf || (kind !== undefined && kind !== 'Union')) {
+		isIntegerCache.set(schema, false)
 		return false
+	}
 
 	let hasIntegerFormat = false
 	let hasNumberType = false
@@ -44,23 +55,34 @@ const isInteger = (schema: TAnySchema) => {
 			continue
 		}
 
+		isIntegerCache.set(schema, false)
 		return false
 	}
 
-	return hasIntegerFormat && hasNumberType
+	const result = hasIntegerFormat && hasNumberType
+	isIntegerCache.set(schema, result)
+
+	return result
 }
 
-const getMetadata = (schema: TAnySchema) => {
+function getMetadata(schema: TAnySchema) {
+	if (metadataCache.has(schema)) return metadataCache.get(schema)!
+
 	let isNullable = false
 	let isUndefinable = false
 	let newSchema
 
-	if (!schema.anyOf || (Kind in schema && schema[Kind] !== 'Union'))
-		return {
+	const kind = kindOf(schema)
+	if (!schema.anyOf || (kind !== undefined && kind !== 'Union')) {
+		const result = {
 			schema,
 			isNullable,
 			isUndefinable
 		}
+		metadataCache.set(schema, result)
+
+		return result
+	}
 
 	for (const type of schema.anyOf) {
 		if (type.type === 'null') {
@@ -78,37 +100,47 @@ const getMetadata = (schema: TAnySchema) => {
 			continue
 		}
 
-		return {
+		const result = {
 			schema,
 			isNullable,
 			isUndefinable
 		}
+		metadataCache.set(schema, result)
+
+		return result
 	}
 
-	return {
+	const result = {
 		schema: newSchema,
 		isNullable,
 		isUndefinable
 	}
+
+	metadataCache.set(schema, result)
+	return result
 }
 
-export const mergeObjectIntersection = (schema: TAnySchema): TAnySchema => {
+export function mergeObjectIntersection(schema: TAnySchema): TAnySchema {
+	const kind = kindOf(schema)
 	if (
 		!schema.allOf ||
-		(Kind in schema &&
-			(schema[Kind] !== 'Intersect' || schema.type !== 'object'))
+		(kind !== undefined && kind !== 'Intersect') ||
+		// only merge intersections of objects
+		!schema.allOf.every(
+			(type: TAnySchema) => type.type === 'object' || type.allOf
+		)
 	)
 		return schema
 
 	const { allOf, ...newSchema } = schema
 	newSchema.properties = {}
-
-	if (Kind in newSchema) newSchema[Kind as any] = 'Object'
+	newSchema.type = 'object'
+	if ('~kind' in schema) newSchema['~kind'] = 'Object'
 
 	for (const type of allOf) {
 		if (type.type !== 'object') continue
 
-		const { properties, required, type: _, [Kind]: __, ...rest } = type
+		const { properties, required, type: _, ...rest } = type
 
 		if (required)
 			newSchema.required = newSchema.required
@@ -124,33 +156,6 @@ export const mergeObjectIntersection = (schema: TAnySchema): TAnySchema => {
 	}
 
 	return newSchema
-}
-
-const isDateType = (schema: TAnySchema): boolean => {
-	if (!schema.anyOf || (Kind in schema && schema[Kind] !== 'Union'))
-		return false
-
-	if (!schema.anyOf) return false
-
-	let hasDateType = false
-	let hasStringFormatDate = false
-	let hasNumberType = false
-
-	if (schema.anyOf)
-		for (const type of schema.anyOf) {
-			if (!hasDateType && type.type === 'Date') hasDateType = true
-
-			if (
-				!hasStringFormatDate &&
-				type.type === 'string' &&
-				(type.format === 'date' || type.format === 'date-time')
-			)
-				hasStringFormatDate = true
-
-			if (!hasNumberType && type.type === 'number') hasNumberType = true
-		}
-
-	return hasDateType
 }
 
 interface Instruction {
@@ -172,34 +177,36 @@ interface Instruction {
 	definitions: Record<string, TAnySchema>
 }
 
-// equivalent to /["\n\r\t\b\f\v]/
-const findEscapeSequence = /["\b\t\n\v\f\r\/]/
+const findEscapeSequence = /[\x00-\x1F"\\]/
 
 const SANITIZE = {
 	auto: (property: string) =>
-		`${findEscapeSequence}.test(${property})?JSON.stringify(${property}).slice(1,-1):${property}`,
+		`fe.test(${property})?JSON.stringify(${property}).slice(1,-1):${property}`,
 	manual: (property: string) => `${property}`,
 	throw: (property: string) =>
-		`${findEscapeSequence}.test(${property})?(()=>{throw new Error("Property '${property}' contains invalid characters")})():${property}`
+		`fe.test(${property})?(()=>{throw new Error("Property '${property}' contains invalid characters")})():${property}`
 } satisfies Record<Instruction['sanitize'], (v: string) => string>
 
-const joinStringArray = (p: string) =>
-	`"$\{` +
-	`((p)=>{` +
-	`if(p.length===1)return p\n` +
-	`let ars=p[0]\n` +
-	`for(let i=1;i<p.length;i++){` +
-	`ars=\`\${ars}","\${p[i]}\`` +
-	`}` +
-	`return ars` +
-	`})(${p})` +
-	'}"'
+const joinStringArray = (p: string) => `"\${jsa(${p})}"`
 
-const handleRecord = (
-	schema: TRecord,
+const SHARED: [marker: string, decl: string][] = [
+	['fe.test(', `const fe=${findEscapeSequence}\n`],
+	[
+		'jsa(',
+		`const jsa=(p)=>{` +
+			`if(p.length===1)return p\n` +
+			`let ars=p[0]\n` +
+			`for(let i=1;i<p.length;i++){` +
+			`ars=\`\${ars}","\${p[i]}\`` +
+			`}` +
+			`return ars}\n`
+	]
+]
+function handleRecord(
+	schema: TAnySchema,
 	property: string,
 	instruction: Instruction
-) => {
+) {
 	const child =
 		schema.patternProperties['^(.*)$'] ??
 		schema.patternProperties[Object.keys(schema.patternProperties)[0]]
@@ -223,18 +230,14 @@ const handleRecord = (
 	)
 }
 
-const accelerate = (
+function accelerate(
 	schema: TAnySchema,
 	property: string,
 	instruction: Instruction
-): string => {
+) {
 	if (!schema) return ''
 
-	if (
-		Kind in schema &&
-		schema[Kind] === 'Import' &&
-		schema.$ref in schema.$defs
-	)
+	if (schema.$defs && schema.$ref in schema.$defs)
 		return accelerate(schema.$defs[schema.$ref], property, {
 			...instruction,
 			definitions: Object.assign(instruction.definitions, schema.$defs)
@@ -298,6 +301,7 @@ const accelerate = (
 			break
 
 		case 'number':
+		case 'integer':
 		case 'boolean':
 		case 'bigint':
 			if (nullableCondition)
@@ -328,8 +332,8 @@ const accelerate = (
 			let hasOptional = false
 			let op = `op${instruction.optional}`
 
-			if (schema[Kind as any] === 'Record') {
-				v = handleRecord(schema as TRecord, property, instruction)
+			if (kindOf(schema) === 'Record') {
+				v = handleRecord(schema, property, instruction)
 
 				break
 			}
@@ -344,15 +348,15 @@ const accelerate = (
 			}
 
 			for (const key in schema.properties)
-				if (OptionalKind in schema.properties[key]) {
+				if (isOptionalSchema(schema.properties[key])) {
 					instruction.optional++
 					hasOptional = true
 					break
 				}
 
 			for (const key in schema.properties) {
-				const isOptional = OptionalKind in schema.properties[key]
-				const name = joinProperty(property, key)
+				const isOptional = isOptionalSchema(schema.properties[key])
+				const name = access(property, key)
 				const hasShortName =
 					schema.properties[key].type === 'object' &&
 					!name.startsWith('ar')
@@ -419,7 +423,7 @@ const accelerate = (
 				if (isRoot) v += 'return `'
 
 				if (nullableCondition)
-					v += `\${${nullableCondition}?'"null"':${property}.length?\`[$\{${property}.toString()}]\`:"[]"`
+					v += `\${${nullableCondition}?'"null"':${property}.length?\`[$\{${property}.toString()}]\`:"[]"}`
 				else
 					v += `\${${property}.length?\`[$\{${property}.toString()}]\`:"[]"}`
 
@@ -456,16 +460,6 @@ const accelerate = (
 					instruction
 				)
 
-			if (isDateType(schema)) {
-				if (isNullable || isUndefinable)
-					v = `\${${nullableCondition}?${schema.default !== undefined ? `'"${schema.default}"'` : "'null'"}:typeof ${property}==="object"?\`\"\${${property}.toISOString()}\"\`:${property}}`
-				else {
-					v = `\${typeof ${property}==="object"?\`\"\${${property}.toISOString()}\"\`:${property}}`
-				}
-
-				break
-			}
-
 			if (isInteger(schema)) {
 				if (nullableCondition)
 					v = `\${${property}??${schema.default !== undefined ? schema.default : `'null'`}}`
@@ -485,6 +479,8 @@ const accelerate = (
 	if (!isArray) v = `\`${v}\``
 
 	let setup = ''
+
+	for (const [marker, decl] of SHARED) if (v.includes(marker)) setup += decl
 
 	if (instruction.optional) {
 		setup += 'let '
@@ -513,13 +509,13 @@ const accelerate = (
 	return setup + 'return ' + v
 }
 
-export const createAccelerator = <T extends TAnySchema>(
+export const createAccelerator = <T extends TSchema>(
 	schema: T,
 	{
 		sanitize = 'auto',
 		definitions = {}
 	}: Partial<Pick<Instruction, 'sanitize' | 'definitions'>> = {}
-): ((v: T['static']) => string) => {
+): ((v: Static<T>) => string) => {
 	const f = accelerate(schema, 'v', {
 		array: 0,
 		optional: 0,
@@ -528,39 +524,7 @@ export const createAccelerator = <T extends TAnySchema>(
 		definitions
 	})
 
-	// console.log(f)
-
 	return Function('v', f) as any
 }
 
 export default createAccelerator
-
-// const shape = t.Object({
-// 	a: t.Nullable(
-// 		t.Object({
-// 			a: t.String()
-// 		})
-// 	)
-// })
-
-// const shape = t.Object({
-// 	a: t.String(),
-// 	social: t.Optional(
-// 		t.Object({
-// 			facebook: t.Nullable(t.String()),
-// 			twitter: t.Nullable(t.String()),
-// 			youtube: t.Nullable(t.String())
-// 		})
-// 	)
-// })
-
-// const stringify = createaccelerate(shape)
-
-// console.log(
-// 	stringify({
-// 		a: 'a',
-// 		social: {
-// 			a: 'a',
-// 		}
-// 	})
-// )

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
-import { isEqual } from './utils'
+import { isEqual, Nullable } from './utils'
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 
 describe('Sample', () => {
 	it('Medium', () => {
@@ -26,7 +26,7 @@ describe('Sample', () => {
 					alias: t.String()
 				}),
 				t.Object({
-					country: t.Nullable(t.String())
+					country: Nullable(t.String())
 				})
 			]),
 			social: t.Optional(
@@ -70,7 +70,7 @@ describe('Sample', () => {
 			social: {
 				twitter: 'SaltyAom'
 			}
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -109,7 +109,7 @@ describe('Sample', () => {
 						alias: t.String()
 					}),
 					t.Object({
-						country: t.Nullable(t.String()),
+						country: Nullable(t.String()),
 						region: t.Optional(t.String())
 					})
 				]),
@@ -237,7 +237,7 @@ describe('Sample', () => {
 					country: 'Japan'
 				}
 			}
-		] satisfies typeof shape.static
+		]
 
 		isEqual(shape, value)
 	})

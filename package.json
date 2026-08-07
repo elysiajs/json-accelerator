@@ -1,6 +1,6 @@
 {
 	"name": "json-accelerator",
-	"version": "0.1.7",
+	"version": "0.2.0",
 	"description": "Speed up JSON stringification by providing OpenAPI/TypeBox model",
 	"license": "MIT",
 	"scripts": {
@@ -11,22 +11,23 @@
 		"release": "npm run build && npm run test && npm publish --access public"
 	},
 	"peerDependencies": {
-		"@sinclair/typebox": ">= 0.34.0"
+		"typebox": ">= 1.0.0"
 	},
 	"peerDependenciesMeta": {
-		"@sinclair/typebox": {
+		"typebox": {
 			"optional": true
 		}
 	},
 	"devDependencies": {
 		"@types/bun": "1.2.10",
-		"elysia": "^1.2.25",
 		"eslint": "9.6.0",
 		"fast-json-stringify": "^6.0.1",
 		"mitata": "^1.0.34",
-		"tsup": "^8.4.0",
+		"tsdown": "^0.22.14",
+		"tsup": "^8.5.1",
 		"tsx": "^4.19.2",
-		"typescript": "^5.8.2"
+		"typebox": "^1.3.11",
+		"typescript": "^6.0.2"
 	},
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/index.mjs",
@@ -36,7 +37,7 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.mjs",
-			"require": "./dist/cjs/index.js"
+			"require": "./dist/index.js"
 		}
 	},
 	"keywords": [

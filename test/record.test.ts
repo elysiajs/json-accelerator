@@ -1,7 +1,7 @@
 import { describe, it } from 'bun:test'
 import { isEqual } from './utils'
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 
 describe('Record', () => {
 	it('handle record', () => {
@@ -10,7 +10,7 @@ describe('Record', () => {
 		const value = {
 			name: 'saltyaom',
 			alias: 'saltyaom'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -33,7 +33,7 @@ describe('Record', () => {
 				name: 'chiffon',
 				age: 24
 			}
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -50,7 +50,7 @@ describe('Record', () => {
 				id: 2,
 				age: 24
 			}
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -72,7 +72,7 @@ describe('Record', () => {
 				a: 1,
 				b: ['a', { hello: 'world' }]
 			}
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})

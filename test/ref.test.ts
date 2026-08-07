@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test'
 import { isEqual } from './utils'
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 
 import { createAccelerator } from '../src'
 
@@ -14,11 +14,11 @@ describe('Ref', () => {
 			})
 		})
 
-		const shape = modules.Import('object')
+		const shape = modules.object
 
 		const value = {
 			name: 'salt'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -35,7 +35,7 @@ describe('Ref', () => {
 			})
 		})
 
-		const shape = modules.Import('object')
+		const shape = modules.object
 
 		const value = {
 			name: 'salt',
@@ -43,7 +43,7 @@ describe('Ref', () => {
 				id: 123,
 				name: 'salt'
 			}
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -60,11 +60,11 @@ describe('Ref', () => {
 			})
 		})
 
-		const shape = modules.Import('object')
+		const shape = modules.object
 
 		const value = {
 			name: 'salt'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, {
 			name: 'salt'
@@ -91,7 +91,7 @@ describe('Ref', () => {
 
 		const value = {
 			name: 'salt'
-		} satisfies typeof shape.static
+		}
 
 		expect(
 			createAccelerator(shape, {

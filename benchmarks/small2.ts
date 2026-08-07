@@ -1,4 +1,4 @@
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 import { benchmark } from './utils'
 
 benchmark(

@@ -1,7 +1,7 @@
 import { describe, it } from 'bun:test'
 import { isEqual } from './utils'
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 
 describe('Array', () => {
 	it('handle string array at root', () => {

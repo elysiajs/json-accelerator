@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { isEqual } from './utils'
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 
 import { createAccelerator } from '../src'
 
@@ -15,7 +15,7 @@ describe('sanitize throw', () => {
 		const value = {
 			a: 'hello',
 			b: 'hello\nworld'
-		} satisfies typeof shape.static
+		}
 
 		expect(() =>
 			createAccelerator(shape, {
@@ -33,7 +33,7 @@ describe('sanitize throw', () => {
 		const value = {
 			a: 'hello',
 			b: 'hello world'
-		} satisfies typeof shape.static
+		}
 
 		expect(() =>
 			createAccelerator(shape, {
@@ -55,7 +55,7 @@ describe('sanitize throw', () => {
 		const value = {
 			a: 'hello',
 			b: 'hello world'
-		} satisfies typeof shape.static
+		}
 
 		expect(() =>
 			createAccelerator(shape, {
@@ -77,7 +77,7 @@ describe('sanitize throw', () => {
 		const value = {
 			a: 'hello',
 			b: 'hello\nworld'
-		} satisfies typeof shape.static
+		}
 
 		expect(() =>
 			createAccelerator(shape, {

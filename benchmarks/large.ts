@@ -1,4 +1,4 @@
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 import { benchmark } from './utils'
 
 benchmark(
@@ -35,7 +35,7 @@ benchmark(
 					alias: t.String()
 				}),
 				t.Object({
-					country: t.Nullable(t.String()),
+					country: t.Union([t.String(), t.Null()]),
 					region: t.Optional(t.String())
 				})
 			]),

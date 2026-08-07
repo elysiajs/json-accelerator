@@ -1,37 +1,21 @@
 import { $ } from 'bun'
-import { build, type Options } from 'tsup'
+import { build } from 'tsdown'
 
 await $`rm -rf dist`
 
-const tsupConfig: Options = {
-    entry: ['src/**/*.ts'],
-    splitting: false,
-    sourcemap: false,
-    clean: true,
-    bundle: true
-} satisfies Options
-
-await Promise.all([
-    // ? tsup esm
-    build({
-        outDir: 'dist',
-        format: 'esm',
-        target: 'node20',
-        cjsInterop: false,
-        ...tsupConfig
-    }),
-    // ? tsup cjs
-    build({
-        outDir: 'dist/cjs',
-        format: 'cjs',
-        target: 'node20',
-        // dts: true,
-        ...tsupConfig
-    })
-])
-
-await $`tsc --project tsconfig.dts.json`
-
-await Promise.all([$`cp dist/*.d.ts dist/cjs`])
-
-process.exit()
+await build({
+	outDir: 'dist',
+	entry: ['src/**/*.ts'],
+	cjsDefault: false,
+	target: 'node22',
+	format: ['esm', 'cjs'],
+	minify: false,
+	unbundle: true,
+	dts: true,
+	outExtensions(c) {
+		return {
+			dts: '.d.ts',
+			js: c.format === 'es' ? '.mjs' : '.js'
+		}
+	}
+})

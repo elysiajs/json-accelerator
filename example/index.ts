@@ -1,4 +1,4 @@
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 import { createAccelerator } from '../src/index'
 
 const shape = t.Array(
@@ -14,8 +14,12 @@ const value = [
 	{
 		name: 'b'
 	}
-] satisfies typeof shape.static
+]
 
-const mirror = createAccelerator(shape)
+const mirror = createAccelerator(shape, {
+	// worker: true
+})
 
-console.log((mirror(value)))
+console.log(mirror.toString())
+
+console.log(await mirror(value))

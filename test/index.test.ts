@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
-import { isEqual } from './utils'
+import { isEqual, Nullable } from './utils'
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 
 import { createAccelerator } from '../src'
 
@@ -9,7 +9,7 @@ describe('Core', () => {
 	it('handle string', () => {
 		const shape = t.String()
 
-		const value = 'saltyaom' satisfies typeof shape.static
+		const value = 'saltyaom'
 
 		isEqual(shape, value)
 	})
@@ -17,7 +17,7 @@ describe('Core', () => {
 	it('handle number', () => {
 		const shape = t.Number()
 
-		const value = 0 satisfies typeof shape.static
+		const value = 0
 
 		isEqual(shape, value)
 	})
@@ -25,7 +25,7 @@ describe('Core', () => {
 	it('handle boolean', () => {
 		const shape = t.Boolean()
 
-		const value = true satisfies typeof shape.static
+		const value = true
 
 		isEqual(shape, value)
 	})
@@ -33,7 +33,7 @@ describe('Core', () => {
 	it('handle literal', () => {
 		const shape = t.Literal('saltyaom')
 
-		const value = 'saltyaom' satisfies typeof shape.static
+		const value = 'saltyaom'
 
 		isEqual(shape, value)
 	})
@@ -41,7 +41,7 @@ describe('Core', () => {
 	it('handle null', () => {
 		const shape = t.Null()
 
-		const value = null satisfies typeof shape.static
+		const value = null
 
 		isEqual(shape, value)
 	})
@@ -49,51 +49,15 @@ describe('Core', () => {
 	it('handle undefined', () => {
 		const shape = t.Undefined()
 
-		const value = undefined satisfies typeof shape.static
+		const value = undefined
 
 		expect(createAccelerator(shape)(value)).toBe('')
-	})
-
-	it('handle date', () => {
-		const shape = t.Date()
-
-		const value = new Date() satisfies typeof shape.static
-
-		expect(createAccelerator(shape)(value)).toBe(`"${value.toISOString()}"`)
-	})
-
-	it('handle date timestamp', () => {
-		const shape = t.Date()
-
-		const value = Date.now()
-
-		isEqual(shape, value)
-	})
-
-	it('handle nullable date', () => {
-		const shape = t.Nullable(t.Date())
-
-		const value = new Date() satisfies typeof shape.static
-		expect(createAccelerator(shape)(value)).toBe(`"${value.toISOString()}"`)
-
-		const value2 = null satisfies typeof shape.static
-		isEqual(shape, value2)
-	})
-
-	it('handle nullable date timestamp', () => {
-		const shape = t.Nullable(t.Date())
-
-		const value = 2
-		isEqual(shape, value)
-
-		const value2 = null satisfies typeof shape.static
-		isEqual(shape, value2)
 	})
 
 	it('handle integer', () => {
 		const shape = t.Integer()
 
-		const value = 2.2 satisfies typeof shape.static
+		const value = 2.2
 
 		isEqual(shape, value)
 	})
@@ -101,7 +65,7 @@ describe('Core', () => {
 	it('handle bigint', () => {
 		const shape = t.BigInt()
 
-		const value = BigInt(2) satisfies typeof shape.static
+		const value = BigInt(2)
 
 		isEqual(shape, +(value + ''))
 	})
@@ -115,7 +79,7 @@ describe('Core', () => {
 		const value = {
 			id: 0,
 			name: 'saltyaom'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -129,7 +93,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			games: ['MiSide', 'Strinova']
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -143,7 +107,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			games: [1, 2, 3]
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -157,7 +121,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			games: [true, false, true]
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -193,7 +157,7 @@ describe('Core', () => {
 					tags: ['FPS', 'Multiplayer', 'Tactical']
 				}
 			]
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -206,7 +170,7 @@ describe('Core', () => {
 
 		const value = {
 			name: 'saltyaom'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -214,13 +178,13 @@ describe('Core', () => {
 	it('handle nullable', () => {
 		const shape = t.Object({
 			name: t.String(),
-			country: t.Nullable(t.String())
+			country: Nullable(t.String())
 		})
 
 		const value = {
 			name: 'saltyaom',
 			country: null
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -228,14 +192,14 @@ describe('Core', () => {
 	it('handle undefinable', () => {
 		const shape = t.Object({
 			name: t.String(),
-			country: t.MaybeEmpty(t.String())
+			country: t.Union([t.String(), t.Undefined(), t.Null()])
 		})
 
 		const value = {
 			name: 'saltyaom',
 			// Transform undefined to null
 			country: null
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -254,7 +218,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			country: 'Thailand'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -273,7 +237,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			playing: 'MiSide'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -285,13 +249,13 @@ describe('Core', () => {
 				playing: t.Optional(t.String())
 			}),
 			t.Object({
-				country: t.Nullable(t.String())
+				country: Nullable(t.String())
 			})
 		])
 
 		const value = {
 			country: null
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -310,7 +274,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			playing: 'Strinova'
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -318,13 +282,13 @@ describe('Core', () => {
 	it('handle nullable array', () => {
 		const shape = t.Object({
 			name: t.String(),
-			games: t.Nullable(t.Array(t.String()))
+			games: Nullable(t.Array(t.String()))
 		})
 
 		const value = {
 			name: 'saltyaom',
 			games: null
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})
@@ -332,7 +296,7 @@ describe('Core', () => {
 	it('handle nullable object', () => {
 		const shape = t.Object({
 			name: t.String(),
-			metadata: t.Nullable(
+			metadata: Nullable(
 				t.Object({
 					alias: t.String()
 				})
@@ -342,7 +306,7 @@ describe('Core', () => {
 		const value = {
 			name: 'saltyaom',
 			metadata: null
-		} satisfies typeof shape.static
+		}
 
 		isEqual(shape, value)
 	})

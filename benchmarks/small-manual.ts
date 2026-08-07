@@ -2,7 +2,7 @@
  * *-manual.ts is where end user specifiy which fields should be sanitized manually
  **/
 
-import { t } from 'elysia'
+import { Type as t } from 'typebox'
 import { benchmark } from './utils'
 
 benchmark(
